@@ -1,0 +1,29 @@
+{
+  "name": "engine",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "parcel-bundler": "^1.12.4",
+    "tone": "^14.7.39",
+    "webmidi": "^2.5.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "parcel ./src/index.html",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gabrieldavison/engine/issues"
+  },
+  "homepage": "https://github.com/gabrieldavison/engine#readme",
+  "browserslist": [
+    "last 2 chrome versions"
+  ]
+}
