@@ -49600,11 +49600,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 _broadcastChannel.bc.onmessage = function (ev) {
   console.log(ev);
-};
+  synth.triggerAttackRelease(ev.data[0], ev.data[1]);
+}; //Button to start audio context
 
-document.addEventListener("click", () => {
-  _broadcastChannel.bc.postMessage("This is a test message.");
-}); //Button to start audio context
 
 const startAudio = document.getElementById("start-sound");
 startAudio.addEventListener("click", async () => {
@@ -49725,7 +49723,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "33457" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "40375" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

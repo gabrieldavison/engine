@@ -1,6 +1,10 @@
 .control-label {
-  writing-mode:vertical-rl;
-  transform: rotate(180deg)
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
 }
+body {
+  background-color: #ff715b;
+}
+
 
 /*# sourceMappingURL=/src.9ad09f98.css.map */
