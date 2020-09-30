@@ -1,9 +1,70 @@
-.control-label {
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
+/* Color variables */
+:root {
+  --light-color: #f7f7ff;
+  --dark-color: #4c5454;
+  --accent-color: #1ea896;
 }
+
+/* apply a natural box layout model to all elements, but allowing components to change */
+html {
+  box-sizing: border-box;
+}
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
 body {
-  background-color: #ff715b;
+  background-color: var(--light-color);
+  max-width: 70vw;
+  margin: auto;
+  font-family: "Space Mono", monospace;
+}
+
+header {
+  text-align: center;
+  color: var(--dark-color);
+  font-weight: bold;
+  font-size: 1.6em;
+}
+
+.synth-controls {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.control-block {
+  flex-grow: 1;
+  background-color: var(--dark-color);
+  padding: 2em;
+  border-radius: 10px;
+  font-size: 1.2em;
+  margin: 0.5em;
+  text-align: center;
+}
+.control {
+  text-align: center;
+}
+
+.control-block span {
+  display: block;
+  color: var(--light-color);
+}
+
+.toggle-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+}
+.toggle-control {
+  width: 33%;
+  text-align: center;
+  font-size: 0.8em;
+  margin-top: 1em;
 }
 
 
