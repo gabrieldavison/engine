@@ -48410,6 +48410,8 @@ function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return 
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
+Tone.context.lookAhead = 0;
+
 class SynthEngine {
   constructor(polyphony) {
     this.bitCrusher = new Tone.BitCrusher({
@@ -48430,6 +48432,7 @@ class SynthEngine {
     this.voiceMaster = new Tone.Volume(0);
     this.volume = new Tone.Volume().chain(this.bitCrusher, this.phaser, this.delay, this.voiceMaster, Tone.Master);
     this.voices = this._createVoices(polyphony);
+    this.voiceState = this._createVoiceState(polyphony);
     this.voiceCounter = 0;
   }
 
@@ -48545,6 +48548,16 @@ class SynthEngine {
     return voiceArray;
   }
 
+  _createVoiceState(polyphony) {
+    const stateArray = [];
+
+    for (let i = 0; i < polyphony; i++) {
+      stateArray.push(undefined);
+    }
+
+    return stateArray;
+  }
+
   _nextVoice() {
     if (this.voiceCounter === this.voices.length - 1) {
       this.voiceCounter = 0;
@@ -48554,10 +48567,33 @@ class SynthEngine {
   }
 
   triggerAttackRelease(note, time = "4t") {
-    console.log(this.voiceCounter);
     this.voices[this.voiceCounter].triggerAttackRelease(note, time);
 
     this._nextVoice();
+  }
+
+  handleNoteOn(key, note) {
+    for (let i = 0; i < this.voiceState.length; i++) {
+      if (this.voiceState[i] === undefined) {
+        this.voiceState[i] = key;
+        this.voices[i].triggerAttack(note);
+        break;
+      } else if (i === this.voiceState.length - 1) {
+        this.voices[0].triggerRelease();
+        this.voices[0].triggerAttack(note);
+        this.voiceState[0] = key;
+      }
+    }
+  }
+
+  handleNoteOff(key) {
+    const voiceIndex = this.voiceState.indexOf(key);
+
+    if (this.voiceState.includes(key)) {
+      this.voices[voiceIndex].triggerRelease();
+    }
+
+    this.voiceState[voiceIndex] = undefined;
   }
 
 }
@@ -48567,7 +48603,7 @@ class SynthVoice {
     this.volume = new Tone.Volume(-12);
     this.ampEnvelope = new Tone.AmplitudeEnvelope({
       attack: 0,
-      release: 0
+      release: 0.1
     });
     this.fmOsc = new Tone.FMOscillator({
       harmonicity: 0,
@@ -48589,6 +48625,19 @@ class SynthVoice {
       frequency: [this.fmOsc.toFrequency(note)]
     });
     this.ampEnvelope.triggerAttackRelease(time);
+  }
+
+  triggerAttack(note) {
+    this.fmOsc.set({
+      frequency: [this.fmOsc.toFrequency(note)]
+    });
+    this.ampEnvelope.triggerAttack(Tone.now());
+    console.log("attack");
+  }
+
+  triggerRelease() {
+    this.ampEnvelope.triggerRelease();
+    console.log("release");
   }
 
 }
@@ -49626,11 +49675,7 @@ synthToggles.forEach(toggle => {
   toggle.addEventListener("change", e => {
     toggleValue(e.target.id, e.target.value);
   });
-}); //Function to scale a number between two values
-
-function scaleBetween(unscaledNum, minAllowed, maxAllowed, min, max) {
-  return (maxAllowed - minAllowed) * (unscaledNum - min) / (max - min) + minAllowed;
-}
+});
 
 function toggleValue(id, val) {
   switch (id) {
@@ -49675,7 +49720,7 @@ function changeValue(id, value) {
       break;
 
     case "release":
-      synth.setRelease(scaleBetween(value, 0, 2, 0, 100));
+      synth.setRelease(scaleBetween(value, 0.1, 2, 0, 100));
       break;
 
     case "level":
@@ -49694,6 +49739,218 @@ function changeValue(id, value) {
       synth.setDelayLevel(scaleBetween(value, 0, 1, 0, 100));
       break;
   }
+} //Event listeners for keys
+
+
+const heldKeys = [];
+window.addEventListener("keydown", e => handleKeydown(e));
+window.addEventListener("keyup", e => handleKeyup(e));
+const scale = ["c", "c#", "d", "d#", "e", "f", "f#", "g", "g#", "a", "a#", "b"];
+const notes = generateNotes();
+
+function generateNotes() {
+  const notesArr = [];
+  let octave = 3;
+
+  for (let i = 0; i < 40; i++) {
+    if (i !== 0 && i % scale.length === 0) {
+      octave += 1;
+    }
+
+    notesArr.push(scale[i % scale.length] + octave);
+  }
+
+  return notesArr;
+}
+
+function handleKeydown(e) {
+  if (heldKeys.includes(e.key)) return;
+  console.log("keydown");
+
+  switch (e.key) {
+    case "1":
+      triggerKey(e.key, notes[0]);
+      break;
+
+    case "2":
+      triggerKey(e.key, notes[1]);
+      break;
+
+    case "3":
+      triggerKey(e.key, notes[2]);
+      break;
+
+    case "4":
+      triggerKey(e.key, notes[3]);
+      break;
+
+    case "5":
+      triggerKey(e.key, notes[4]);
+      break;
+
+    case "6":
+      triggerKey(e.key, notes[5]);
+      break;
+
+    case "7":
+      triggerKey(e.key, notes[6]);
+      break;
+
+    case "8":
+      triggerKey(e.key, notes[7]);
+      break;
+
+    case "9":
+      triggerKey(e.key, notes[8]);
+      break;
+
+    case "0":
+      triggerKey(e.key, notes[9]);
+      break;
+
+    case "q":
+      triggerKey(e.key, notes[10]);
+      break;
+
+    case "w":
+      triggerKey(e.key, notes[11]);
+      break;
+
+    case "e":
+      triggerKey(e.key, notes[12]);
+      break;
+
+    case "r":
+      triggerKey(e.key, notes[13]);
+      break;
+
+    case "t":
+      triggerKey(e.key, notes[14]);
+      break;
+
+    case "y":
+      triggerKey(e.key, notes[15]);
+      break;
+
+    case "u":
+      triggerKey(e.key, notes[16]);
+      break;
+
+    case "i":
+      triggerKey(e.key, notes[17]);
+      break;
+
+    case "o":
+      triggerKey(e.key, notes[18]);
+      break;
+
+    case "p":
+      triggerKey(e.key, notes[19]);
+      break;
+
+    case "a":
+      triggerKey(e.key, notes[20]);
+      break;
+
+    case "s":
+      triggerKey(e.key, notes[21]);
+      break;
+
+    case "d":
+      triggerKey(e.key, notes[22]);
+      break;
+
+    case "f":
+      triggerKey(e.key, notes[23]);
+      break;
+
+    case "g":
+      triggerKey(e.key, notes[24]);
+      break;
+
+    case "h":
+      triggerKey(e.key, notes[25]);
+      break;
+
+    case "j":
+      triggerKey(e.key, notes[26]);
+      break;
+
+    case "k":
+      triggerKey(e.key, notes[27]);
+      break;
+
+    case "l":
+      triggerKey(e.key, notes[28]);
+      break;
+
+    case ";":
+      triggerKey(e.key, notes[29]);
+      break;
+
+    case "z":
+      triggerKey(e.key, notes[30]);
+      break;
+
+    case "x":
+      triggerKey(e.key, notes[31]);
+      break;
+
+    case "c":
+      triggerKey(e.key, notes[32]);
+      break;
+
+    case "v":
+      triggerKey(e.key, notes[33]);
+      break;
+
+    case "b":
+      triggerKey(e.key, notes[34]);
+      break;
+
+    case "n":
+      triggerKey(e.key, notes[35]);
+      break;
+
+    case "m":
+      triggerKey(e.key, notes[36]);
+      break;
+
+    case ",":
+      triggerKey(e.key, notes[37]);
+      break;
+
+    case ".":
+      triggerKey(e.key, notes[38]);
+      break;
+
+    case "/":
+      triggerKey(e.key, notes[39]);
+      break;
+
+    default:
+      return;
+  }
+}
+
+function handleKeyup(e) {
+  console.log("keyup");
+
+  if (heldKeys.includes(e.key)) {
+    const keyIndex = heldKeys.indexOf(e.key);
+    heldKeys.splice(keyIndex, 1);
+    synth.handleNoteOff(e.key);
+  }
+}
+
+function triggerKey(key, note) {
+  heldKeys.push(key);
+  synth.handleNoteOn(key, note);
+} //Function to scale a number between two values
+
+
+function scaleBetween(unscaledNum, minAllowed, maxAllowed, min, max) {
+  return (maxAllowed - minAllowed) * (unscaledNum - min) / (max - min) + minAllowed;
 }
 },{"./sound.js":"sound.js","tone":"../node_modules/tone/build/esm/index.js","./midi":"midi.js","./broadcastChannel":"broadcastChannel.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
@@ -49723,7 +49980,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "45373" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "36239" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

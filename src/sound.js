@@ -1,5 +1,7 @@
 import * as Tone from "tone";
 
+Tone.context.lookAhead = 0;
+
 class SynthEngine {
   constructor(polyphony) {
     this.bitCrusher = new Tone.BitCrusher({ bits: 6, wet: 0 });
@@ -19,6 +21,7 @@ class SynthEngine {
       Tone.Master
     );
     this.voices = this._createVoices(polyphony);
+    this.voiceState = this._createVoiceState(polyphony);
     this.voiceCounter = 0;
   }
 
@@ -101,6 +104,15 @@ class SynthEngine {
     }
     return voiceArray;
   }
+
+  _createVoiceState(polyphony) {
+    const stateArray = [];
+    for (let i = 0; i < polyphony; i++) {
+      stateArray.push(undefined);
+    }
+    return stateArray;
+  }
+
   _nextVoice() {
     if (this.voiceCounter === this.voices.length - 1) {
       this.voiceCounter = 0;
@@ -109,16 +121,37 @@ class SynthEngine {
     }
   }
   triggerAttackRelease(note, time = "4t") {
-    console.log(this.voiceCounter);
     this.voices[this.voiceCounter].triggerAttackRelease(note, time);
     this._nextVoice();
+  }
+  handleNoteOn(key, note) {
+    for (let i = 0; i < this.voiceState.length; i++) {
+      if (this.voiceState[i] === undefined) {
+        this.voiceState[i] = key;
+        this.voices[i].triggerAttack(note);
+
+        break;
+      } else if (i === this.voiceState.length - 1) {
+        this.voices[0].triggerRelease();
+        this.voices[0].triggerAttack(note);
+        this.voiceState[0] = key;
+      }
+    }
+  }
+  handleNoteOff(key) {
+    const voiceIndex = this.voiceState.indexOf(key);
+    if (this.voiceState.includes(key)) {
+      this.voices[voiceIndex].triggerRelease();
+    }
+
+    this.voiceState[voiceIndex] = undefined;
   }
 }
 
 class SynthVoice {
   constructor() {
     this.volume = new Tone.Volume(-12);
-    this.ampEnvelope = new Tone.AmplitudeEnvelope({ attack: 0, release: 0 });
+    this.ampEnvelope = new Tone.AmplitudeEnvelope({ attack: 0, release: 0.1 });
     this.fmOsc = new Tone.FMOscillator({
       harmonicity: 0,
       modulationIndex: 0,
@@ -134,6 +167,15 @@ class SynthVoice {
   triggerAttackRelease(note, time) {
     this.fmOsc.set({ frequency: [this.fmOsc.toFrequency(note)] });
     this.ampEnvelope.triggerAttackRelease(time);
+  }
+  triggerAttack(note) {
+    this.fmOsc.set({ frequency: [this.fmOsc.toFrequency(note)] });
+    this.ampEnvelope.triggerAttack(Tone.now());
+    console.log("attack");
+  }
+  triggerRelease() {
+    this.ampEnvelope.triggerRelease();
+    console.log("release");
   }
 }
 

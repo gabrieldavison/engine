@@ -17,7 +17,7 @@ html {
 
 body {
   background-color: var(--light-color);
-  max-width: 70vw;
+  max-width: 100vw;
   margin: auto;
   font-family: "Space Mono", monospace;
 }
@@ -33,17 +33,6 @@ pre {
   font-size: 8px;
 }
 
-@media only screen and (min-width: 550px) {
-  pre {
-    font-size: 10px;
-  }
-}
-@media only screen and (min-width: 950px) {
-  pre {
-    font-size: 20px;
-  }
-}
-
 .synth-controls {
   display: flex;
   flex-direction: row;
@@ -55,10 +44,11 @@ pre {
 .control-block {
   flex-grow: 1;
   background-color: var(--dark-color);
-  padding: 2em;
+  padding: 0.2em 1em, 0, 2em, 1em;
   border-radius: 10px;
   font-size: 1.2em;
-  margin: 0.5em;
+  margin: 0;
+  margin-bottom: 15px;
   text-align: center;
 }
 .control {
@@ -80,4 +70,25 @@ pre {
   text-align: center;
   font-size: 0.8em;
   margin-top: 1em;
+}
+.slider {
+  height: 30px;
+}
+
+@media only screen and (min-width: 550px) {
+  pre {
+    font-size: 10px;
+  }
+  .control-block {
+    padding: 2em;
+    margin: 0.5em;
+  }
+  body {
+    max-width: 70vw;
+  }
+}
+@media only screen and (min-width: 950px) {
+  pre {
+    font-size: 20px;
+  }
 }
