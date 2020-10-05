@@ -49714,6 +49714,226 @@ Object.defineProperty(exports, "__esModule", {
 exports.bc = void 0;
 const bc = new BroadcastChannel("notes");
 exports.bc = bc;
+},{}],"keyboard.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+class KeyboardController {
+  constructor(synth) {
+    this.synth = synth;
+    this.heldKeys = [];
+    this.scale = ["c", "c#", "d", "d#", "e", "f", "f#", "g", "g#", "a", "a#", "b"];
+    this.notes = this.generateNotes();
+  }
+
+  generateNotes() {
+    const notesArr = []; //Lowest octave of keyboard
+
+    let octave = 3;
+
+    for (let i = 0; i < 40; i++) {
+      if (i !== 0 && i % this.scale.length === 0) {
+        octave += 1;
+      }
+
+      notesArr.push(this.scale[i % this.scale.length] + octave);
+    }
+
+    return notesArr;
+  }
+
+  handleKeydown(e) {
+    if (this.heldKeys.includes(e.key)) return;
+    console.log("keydown");
+
+    switch (e.key) {
+      case "1":
+        this.triggerKey(e.key, this.notes[0]);
+        break;
+
+      case "2":
+        this.triggerKey(e.key, this.notes[1]);
+        break;
+
+      case "3":
+        this.triggerKey(e.key, this.notes[2]);
+        break;
+
+      case "4":
+        this.triggerKey(e.key, this.notes[3]);
+        break;
+
+      case "5":
+        this.triggerKey(e.key, this.notes[4]);
+        break;
+
+      case "6":
+        this.triggerKey(e.key, this.notes[5]);
+        break;
+
+      case "7":
+        this.triggerKey(e.key, this.notes[6]);
+        break;
+
+      case "8":
+        this.triggerKey(e.key, this.notes[7]);
+        break;
+
+      case "9":
+        this.triggerKey(e.key, this.notes[8]);
+        break;
+
+      case "0":
+        this.triggerKey(e.key, this.notes[9]);
+        break;
+
+      case "q":
+        this.triggerKey(e.key, this.notes[10]);
+        break;
+
+      case "w":
+        this.triggerKey(e.key, this.notes[11]);
+        break;
+
+      case "e":
+        this.triggerKey(e.key, this.notes[12]);
+        break;
+
+      case "r":
+        this.triggerKey(e.key, this.notes[13]);
+        break;
+
+      case "t":
+        this.triggerKey(e.key, this.notes[14]);
+        break;
+
+      case "y":
+        this.triggerKey(e.key, this.notes[15]);
+        break;
+
+      case "u":
+        this.triggerKey(e.key, this.notes[16]);
+        break;
+
+      case "i":
+        this.triggerKey(e.key, this.notes[17]);
+        break;
+
+      case "o":
+        this.triggerKey(e.key, this.notes[18]);
+        break;
+
+      case "p":
+        this.triggerKey(e.key, this.notes[19]);
+        break;
+
+      case "a":
+        this.triggerKey(e.key, this.notes[20]);
+        break;
+
+      case "s":
+        this.triggerKey(e.key, this.notes[21]);
+        break;
+
+      case "d":
+        this.triggerKey(e.key, this.notes[22]);
+        break;
+
+      case "f":
+        this.triggerKey(e.key, this.notes[23]);
+        break;
+
+      case "g":
+        this.triggerKey(e.key, this.notes[24]);
+        break;
+
+      case "h":
+        this.triggerKey(e.key, this.notes[25]);
+        break;
+
+      case "j":
+        this.triggerKey(e.key, this.notes[26]);
+        break;
+
+      case "k":
+        this.triggerKey(e.key, this.notes[27]);
+        break;
+
+      case "l":
+        this.triggerKey(e.key, this.notes[28]);
+        break;
+
+      case ";":
+        this.triggerKey(e.key, this.notes[29]);
+        break;
+
+      case "z":
+        this.triggerKey(e.key, this.notes[30]);
+        break;
+
+      case "x":
+        this.triggerKey(e.key, this.notes[31]);
+        break;
+
+      case "c":
+        this.triggerKey(e.key, this.notes[32]);
+        break;
+
+      case "v":
+        this.triggerKey(e.key, this.notes[33]);
+        break;
+
+      case "b":
+        this.triggerKey(e.key, this.notes[34]);
+        break;
+
+      case "n":
+        this.triggerKey(e.key, this.notes[35]);
+        break;
+
+      case "m":
+        this.triggerKey(e.key, this.notes[36]);
+        break;
+
+      case ",":
+        this.triggerKey(e.key, this.notes[37]);
+        break;
+
+      case ".":
+        this.triggerKey(e.key, this.notes[38]);
+        break;
+
+      case "/":
+        this.triggerKey(e.key, this.notes[39]);
+        break;
+
+      default:
+        return;
+    }
+  }
+
+  handleKeyup(e) {
+    console.log("keyup");
+
+    if (this.heldKeys.includes(e.key)) {
+      const keyIndex = this.heldKeys.indexOf(e.key);
+      this.heldKeys.splice(keyIndex, 1);
+      this.synth.handleNoteOff(e.key);
+    }
+  }
+
+  triggerKey(key, note) {
+    this.heldKeys.push(key);
+    this.synth.handleNoteOn(key, note);
+  }
+
+}
+
+exports.default = KeyboardController;
 },{}],"index.js":[function(require,module,exports) {
 "use strict";
 
@@ -49726,6 +49946,8 @@ var _midi = _interopRequireDefault(require("./midi"));
 var _ui = _interopRequireDefault(require("./ui"));
 
 var _broadcastChannel = require("./broadcastChannel");
+
+var _keyboard = _interopRequireDefault(require("./keyboard.js"));
 
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
 
@@ -49744,10 +49966,8 @@ startAudio.addEventListener("click", async () => {
   console.log("audio is ready");
 });
 const synth = new _sound.default(4);
-const UI = new _ui.default(synth); //Button to trigger note
-
-const playNoteButton = document.getElementById("play-note");
-playNoteButton.addEventListener("click", () => synth.triggerAttackRelease("c5", 1)); // Event listener for sliders
+const UI = new _ui.default(synth);
+const keyboard = new _keyboard.default(synth); // Event listener for sliders
 
 const synthSliders = document.querySelectorAll(".slider");
 synthSliders.forEach(slider => {
@@ -49763,213 +49983,9 @@ synthToggles.forEach(toggle => {
   });
 }); //Event listeners for keys
 
-const heldKeys = [];
-window.addEventListener("keydown", e => handleKeydown(e));
-window.addEventListener("keyup", e => handleKeyup(e));
-const scale = ["c", "c#", "d", "d#", "e", "f", "f#", "g", "g#", "a", "a#", "b"];
-const notes = generateNotes();
-
-function generateNotes() {
-  const notesArr = []; //Lowest octave of keyboard
-
-  let octave = 3;
-
-  for (let i = 0; i < 40; i++) {
-    if (i !== 0 && i % scale.length === 0) {
-      octave += 1;
-    }
-
-    notesArr.push(scale[i % scale.length] + octave);
-  }
-
-  return notesArr;
-}
-
-function handleKeydown(e) {
-  if (heldKeys.includes(e.key)) return;
-  console.log("keydown");
-
-  switch (e.key) {
-    case "1":
-      triggerKey(e.key, notes[0]);
-      break;
-
-    case "2":
-      triggerKey(e.key, notes[1]);
-      break;
-
-    case "3":
-      triggerKey(e.key, notes[2]);
-      break;
-
-    case "4":
-      triggerKey(e.key, notes[3]);
-      break;
-
-    case "5":
-      triggerKey(e.key, notes[4]);
-      break;
-
-    case "6":
-      triggerKey(e.key, notes[5]);
-      break;
-
-    case "7":
-      triggerKey(e.key, notes[6]);
-      break;
-
-    case "8":
-      triggerKey(e.key, notes[7]);
-      break;
-
-    case "9":
-      triggerKey(e.key, notes[8]);
-      break;
-
-    case "0":
-      triggerKey(e.key, notes[9]);
-      break;
-
-    case "q":
-      triggerKey(e.key, notes[10]);
-      break;
-
-    case "w":
-      triggerKey(e.key, notes[11]);
-      break;
-
-    case "e":
-      triggerKey(e.key, notes[12]);
-      break;
-
-    case "r":
-      triggerKey(e.key, notes[13]);
-      break;
-
-    case "t":
-      triggerKey(e.key, notes[14]);
-      break;
-
-    case "y":
-      triggerKey(e.key, notes[15]);
-      break;
-
-    case "u":
-      triggerKey(e.key, notes[16]);
-      break;
-
-    case "i":
-      triggerKey(e.key, notes[17]);
-      break;
-
-    case "o":
-      triggerKey(e.key, notes[18]);
-      break;
-
-    case "p":
-      triggerKey(e.key, notes[19]);
-      break;
-
-    case "a":
-      triggerKey(e.key, notes[20]);
-      break;
-
-    case "s":
-      triggerKey(e.key, notes[21]);
-      break;
-
-    case "d":
-      triggerKey(e.key, notes[22]);
-      break;
-
-    case "f":
-      triggerKey(e.key, notes[23]);
-      break;
-
-    case "g":
-      triggerKey(e.key, notes[24]);
-      break;
-
-    case "h":
-      triggerKey(e.key, notes[25]);
-      break;
-
-    case "j":
-      triggerKey(e.key, notes[26]);
-      break;
-
-    case "k":
-      triggerKey(e.key, notes[27]);
-      break;
-
-    case "l":
-      triggerKey(e.key, notes[28]);
-      break;
-
-    case ";":
-      triggerKey(e.key, notes[29]);
-      break;
-
-    case "z":
-      triggerKey(e.key, notes[30]);
-      break;
-
-    case "x":
-      triggerKey(e.key, notes[31]);
-      break;
-
-    case "c":
-      triggerKey(e.key, notes[32]);
-      break;
-
-    case "v":
-      triggerKey(e.key, notes[33]);
-      break;
-
-    case "b":
-      triggerKey(e.key, notes[34]);
-      break;
-
-    case "n":
-      triggerKey(e.key, notes[35]);
-      break;
-
-    case "m":
-      triggerKey(e.key, notes[36]);
-      break;
-
-    case ",":
-      triggerKey(e.key, notes[37]);
-      break;
-
-    case ".":
-      triggerKey(e.key, notes[38]);
-      break;
-
-    case "/":
-      triggerKey(e.key, notes[39]);
-      break;
-
-    default:
-      return;
-  }
-}
-
-function handleKeyup(e) {
-  console.log("keyup");
-
-  if (heldKeys.includes(e.key)) {
-    const keyIndex = heldKeys.indexOf(e.key);
-    heldKeys.splice(keyIndex, 1);
-    synth.handleNoteOff(e.key);
-  }
-}
-
-function triggerKey(key, note) {
-  heldKeys.push(key);
-  synth.handleNoteOn(key, note);
-} //Function to scale a number between two values
-},{"./sound.js":"sound.js","tone":"../node_modules/tone/build/esm/index.js","./midi":"midi.js","./ui":"ui.js","./broadcastChannel":"broadcastChannel.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+window.addEventListener("keydown", e => keyboard.handleKeydown(e));
+window.addEventListener("keyup", e => keyboard.handleKeyup(e));
+},{"./sound.js":"sound.js","tone":"../node_modules/tone/build/esm/index.js","./midi":"midi.js","./ui":"ui.js","./broadcastChannel":"broadcastChannel.js","./keyboard.js":"keyboard.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
