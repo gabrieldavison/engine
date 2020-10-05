@@ -49621,7 +49621,91 @@ _webmidi.default.enable(function (err) {
   console.log(_webmidi.default.inputs);
   console.log(_webmidi.default.outputs);
 });
-},{"webmidi":"../node_modules/webmidi/webmidi.min.js"}],"broadcastChannel.js":[function(require,module,exports) {
+},{"webmidi":"../node_modules/webmidi/webmidi.min.js"}],"ui.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+class UIController {
+  constructor(synth) {
+    this.synth = synth;
+  }
+
+  setValue(id, value) {
+    switch (id) {
+      case "mod-index":
+        this.synth.setModulationIndex(value);
+        break;
+
+      case "harmonicity":
+        this.synth.setHarmonicity(scaleBetween(value, 0, 40, 0, 100));
+        break;
+
+      case "noise":
+        this.synth.setNoise(scaleBetween(value, -60, 10, 0, 100));
+        break;
+
+      case "cutoff":
+        this.synth.setCutoff(scaleBetween(value, 20, 8000, 0, 100));
+        break;
+
+      case "resonance":
+        this.synth.setResonance(scaleBetween(value, 0, 50, 0, 100));
+        break;
+
+      case "attack":
+        this.synth.setAttack(scaleBetween(value, 0, 2, 0, 100));
+        break;
+
+      case "release":
+        this.synth.setRelease(scaleBetween(value, 0.1, 2, 0, 100));
+        break;
+
+      case "level":
+        this.synth.setLevel(scaleBetween(value, -60, 10, 0, 100));
+        break;
+
+      case "delay":
+        this.synth.setDelay(scaleBetween(value, 0, 1, 0, 100));
+        break;
+
+      case "delay-feedback":
+        this.synth.setDelayFeedback(scaleBetween(value, 0, 1, 0, 100));
+        break;
+
+      case "delay-level":
+        this.synth.setDelayLevel(scaleBetween(value, 0, 1, 0, 100));
+        break;
+    }
+  }
+
+  toggleValue(id, val) {
+    switch (id) {
+      case "bitcrusher":
+        val == 0 ? this.synth.setBitcrusher(0) : this.synth.setBitcrusher(1);
+        break;
+
+      case "phaser":
+        val == 0 ? this.synth.setPhaser(0) : this.synth.setPhaser(0.7);
+        break;
+
+      case "mute":
+        val == 0 ? this.synth.setMasterVolume(0) : this.synth.setMasterVolume(-60);
+        break;
+    }
+  }
+
+}
+
+exports.default = UIController;
+
+function scaleBetween(unscaledNum, minAllowed, maxAllowed, min, max) {
+  return (maxAllowed - minAllowed) * (unscaledNum - min) / (max - min) + minAllowed;
+}
+},{}],"broadcastChannel.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -49639,6 +49723,8 @@ var Tone = _interopRequireWildcard(require("tone"));
 
 var _midi = _interopRequireDefault(require("./midi"));
 
+var _ui = _interopRequireDefault(require("./ui"));
+
 var _broadcastChannel = require("./broadcastChannel");
 
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
@@ -49648,7 +49734,6 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 _broadcastChannel.bc.onmessage = function (ev) {
-  console.log(ev);
   synth.triggerAttackRelease(ev.data[0], ev.data[1]);
 }; //Button to start audio context
 
@@ -49658,7 +49743,8 @@ startAudio.addEventListener("click", async () => {
   await Tone.start();
   console.log("audio is ready");
 });
-const synth = new _sound.default(4); //Button to trigger note
+const synth = new _sound.default(4);
+const UI = new _ui.default(synth); //Button to trigger note
 
 const playNoteButton = document.getElementById("play-note");
 playNoteButton.addEventListener("click", () => synth.triggerAttackRelease("c5", 1)); // Event listeners for sliders
@@ -49666,81 +49752,16 @@ playNoteButton.addEventListener("click", () => synth.triggerAttackRelease("c5", 
 const synthSliders = document.querySelectorAll(".slider");
 synthSliders.forEach(slider => {
   slider.addEventListener("input", e => {
-    changeValue(e.target.id, e.target.value);
+    UI.setValue(e.target.id, e.target.value);
   });
 }); //Event Listeners for toggles
 
 const synthToggles = document.querySelectorAll(".toggle");
 synthToggles.forEach(toggle => {
   toggle.addEventListener("change", e => {
-    toggleValue(e.target.id, e.target.value);
+    UI.toggleValue(e.target.id, e.target.value);
   });
-});
-
-function toggleValue(id, val) {
-  switch (id) {
-    case "bitcrusher":
-      val == 0 ? synth.setBitcrusher(0) : synth.setBitcrusher(1);
-      break;
-
-    case "phaser":
-      val == 0 ? synth.setPhaser(0) : synth.setPhaser(0.7);
-      break;
-
-    case "mute":
-      val == 0 ? synth.setMasterVolume(0) : synth.setMasterVolume(-60);
-      break;
-  }
-}
-
-function changeValue(id, value) {
-  switch (id) {
-    case "mod-index":
-      synth.setModulationIndex(value);
-      break;
-
-    case "harmonicity":
-      synth.setHarmonicity(scaleBetween(value, 0, 40, 0, 100));
-      break;
-
-    case "noise":
-      synth.setNoise(scaleBetween(value, -60, 10, 0, 100));
-      break;
-
-    case "cutoff":
-      synth.setCutoff(scaleBetween(value, 20, 8000, 0, 100));
-      break;
-
-    case "resonance":
-      synth.setResonance(scaleBetween(value, 0, 50, 0, 100));
-      break;
-
-    case "attack":
-      synth.setAttack(scaleBetween(value, 0, 2, 0, 100));
-      break;
-
-    case "release":
-      synth.setRelease(scaleBetween(value, 0.1, 2, 0, 100));
-      break;
-
-    case "level":
-      synth.setLevel(scaleBetween(value, -60, 10, 0, 100));
-      break;
-
-    case "delay":
-      synth.setDelay(scaleBetween(value, 0, 1, 0, 100));
-      break;
-
-    case "delay-feedback":
-      synth.setDelayFeedback(scaleBetween(value, 0, 1, 0, 100));
-      break;
-
-    case "delay-level":
-      synth.setDelayLevel(scaleBetween(value, 0, 1, 0, 100));
-      break;
-  }
-} //Event listeners for keys
-
+}); //Event listeners for keys
 
 const heldKeys = [];
 window.addEventListener("keydown", e => handleKeydown(e));
@@ -49947,12 +49968,7 @@ function triggerKey(key, note) {
   heldKeys.push(key);
   synth.handleNoteOn(key, note);
 } //Function to scale a number between two values
-
-
-function scaleBetween(unscaledNum, minAllowed, maxAllowed, min, max) {
-  return (maxAllowed - minAllowed) * (unscaledNum - min) / (max - min) + minAllowed;
-}
-},{"./sound.js":"sound.js","tone":"../node_modules/tone/build/esm/index.js","./midi":"midi.js","./broadcastChannel":"broadcastChannel.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"./sound.js":"sound.js","tone":"../node_modules/tone/build/esm/index.js","./midi":"midi.js","./ui":"ui.js","./broadcastChannel":"broadcastChannel.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -49980,7 +49996,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "36239" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "41911" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
