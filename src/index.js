@@ -25,18 +25,16 @@ playNoteButton.addEventListener("click", () =>
   synth.triggerAttackRelease("c5", 1)
 );
 
-// Event listeners for sliders
+// Event listener for sliders
 const synthSliders = document.querySelectorAll(".slider");
-
 synthSliders.forEach((slider) => {
   slider.addEventListener("input", (e) => {
     UI.setValue(e.target.id, e.target.value);
   });
 });
 
-//Event Listeners for toggles
+//Event listener for toggles
 const synthToggles = document.querySelectorAll(".toggle");
-
 synthToggles.forEach((toggle) => {
   toggle.addEventListener("change", (e) => {
     UI.toggleValue(e.target.id, e.target.value);
@@ -55,6 +53,7 @@ const notes = generateNotes();
 
 function generateNotes() {
   const notesArr = [];
+  //Lowest octave of keyboard
   let octave = 3;
   for (let i = 0; i < 40; i++) {
     if (i !== 0 && i % scale.length === 0) {
