@@ -11,7 +11,7 @@
   "devDependencies": {},
   "scripts": {
     "start": "parcel ./src/index.html ./src/assets/**/*",
-    "build": "parcel build ./src/index.html ./src/assets/**/* -d ./docs/demo",
+    "build": "parcel build ./src/index.html ./src/assets/**/* -d ./docs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
