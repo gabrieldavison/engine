@@ -32,6 +32,16 @@ pre {
   overflow: hidden;
   font-size: 8px;
 }
+#start-sound {
+  display: block;
+  margin: auto;
+  font-size: 1.2em;
+  background-color: var(--light-color);
+}
+#start-sound:hover {
+  background-color: var(--dark-color);
+  color: var(--light-color);
+}
 
 .synth-controls {
   display: flex;
